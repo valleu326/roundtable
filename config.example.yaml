@@ -1,0 +1,91 @@
+# 圆桌 RoundTable —— 模型配置文件（示例）
+#
+# 这是脱敏示例，不含任何真实 key。使用步骤：
+#   1. 复制本文件：cp config.example.yaml config.yaml
+#   2. 把下面每一条的 api_key 占位符，换成你自己的真实 key
+#   3. （可选）按需增删 model_list 条目，改 persona / temperature
+#   真正生效的是 config.yaml，本文件仅作模板，不会被代码读取。
+#
+# 写法完全对标 LiteLLM 官方的 config.yaml：
+#   model_list: 一个模型一条，每条有 model_name(别名) + persona + temperature + litellm_params(连接参数)。
+#
+# 傻瓜式用法（参考 Cherry Studio / Chatbox 添加模型的方式）：
+#   想加一个选手 → 在 model_list 下面复制一条，改 5 个地方即可：
+#       1. model_name   ：起个你记得住的名字（UI 上显示用，随便起）
+#       2. persona      ：人设（可留空 ""，也可写一句话让模型有不同风格）
+#       3. temperature  ：温度，越高越发散、越低越稳定
+#       4. model        ：厂商的模型名（裸名或带厂商斜杠都行，config.py 会自动加 openai/ 前缀走兼容协议）
+#       5. api_base     ：厂商的 API 地址
+#       6. api_key      ：你的真实 key，直接粘贴在这里
+#   想减一个选手 → 删掉对应那一条即可。
+#   选手数量 = model_list 条数，随便几个都行（配几个就几个上桌辩论）。
+#
+# 说明：model 字段写法
+#   - 裸名：        deepseek-v4-pro          → 自动变成 openai/deepseek-v4-pro
+#   - 带厂商斜杠：  zai-org/GLM-5.2          → 自动变成 openai/zai-org/GLM-5.2（厂商斜杠原样保留）
+#   - 已带 openai/：openai/xxx               → 会被规范成 openai/xxx，不重复加
+#   凡是以 openai/ 开头，litellm 就走 OpenAI 兼容路由，用本条的 api_base + api_key 去调。
+#
+# ──────────────────────────────────────────────
+# 下面这一段是「参赛选手」，它们参与「作答 + 参考他人修正」。
+# 想用谁就取消注释、填上 key；不想用就保持注释。
+# ──────────────────────────────────────────────
+model_list:
+  # —— 选手 1：DeepSeek（官方接口）——
+  - model_name: DeepSeek
+    persona: ""
+    temperature: 1.0
+    litellm_params:
+      model: deepseek-v4-pro
+      api_base: https://api.deepseek.com
+      api_key: 在此填写你的 API Key        # ← 换成你的真实 key
+
+  # —— 选手 2：GLM（智谱，经硅基流动 SiliconFlow 调用）——
+  - model_name: GLM
+    persona: ""
+    temperature: 1.0
+    litellm_params:
+      model: zai-org/GLM-5.2
+      api_base: https://api.siliconflow.cn
+      api_key: 在此填写你的 API Key        # ← 换成你的硅基流动 key
+
+  # —— 选手 3：Kimi（Moonshot，经硅基流动调用）——
+  # - model_name: Kimi
+  #   persona: ""
+  #   temperature: 1.0
+  #   litellm_params:
+  #     model: moonshotai/Kimi-K2.7-Code
+  #     api_base: https://api.siliconflow.cn
+  #     api_key: 在此填写你的 API Key
+
+  # —— 选手 4：通义千问（阿里云百炼）——
+  # - model_name: Qwen
+  #   persona: ""
+  #   temperature: 0.7
+  #   litellm_params:
+  #     model: qwen3.7-max
+  #     api_base: https://dashscope.aliyuncs.com/compatible-mode/v1
+  #     api_key: 在此填写你的 API Key
+
+  # —— 选手 5：豆包（火山方舟）——
+  #   注意：豆包的 model 要填「推理接入点 endpoint id」(形如 ep-xxxx)，
+  #         在火山方舟控制台「推理接入点」创建后复制粘贴过来。
+  # - model_name: Doubao
+  #   persona: ""
+  #   temperature: 1.0
+  #   litellm_params:
+  #     model: ep-你的接入点id
+  #     api_base: https://ark.cn-beijing.volces.com/api/v3
+  #     api_key: 在此填写你的 API Key
+
+# ──────────────────────────────────────────────
+# 「主席」裁判模型（负责打分排序 + 合并最终答案）
+# ──────────────────────────────────────────────
+# 可选：不配 chair 节，就默认复用 model_list 的第一个选手当主席（省得最小配置也能跑）。
+# 想让主席用另一个更稳的模型，就取消下面的注释、填好连接信息。
+# chair:
+#   model_name: 主席
+#   litellm_params:
+#     model: deepseek-v4-pro
+#     api_base: https://api.deepseek.com
+#     api_key: 在此填写你的 API Key

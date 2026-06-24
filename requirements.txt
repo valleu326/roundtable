@@ -1,0 +1,11 @@
+# 圆桌 RoundTable 依赖清单
+# 安装：conda activate roundtable && pip install -r requirements.txt
+# 版本是“最低需要”的下限，已在本机实测过这套组合能跑通。
+
+litellm>=1.89.0          # 统一调用各厂商模型的核心库
+langgraph>=1.2.0         # 把辩论工作流编排成“图”
+langchain-core>=1.4.0    # LangGraph 的底层依赖（消息类型等）
+chainlit>=2.11.0         # 纯 Python 的聊天界面
+langchain-mcp-adapters>=0.3.0  # 给模型挂 MCP 工具（第一版暂不用，先装上备用）
+python-dotenv>=1.0.0     # 从 .env 文件读取环境变量（API key 等）
+pyyaml>=6.0              # 读取 config.yaml（模型列表配置）
