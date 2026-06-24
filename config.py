@@ -1,13 +1,13 @@
 """
 config.py —— 项目的常量与配置加载入口。
 
-分工（和 config.yaml 分开，方便阅读）：
-  - config.yaml  : 只管“有哪些模型、各连哪家、key 是什么”——傻瓜式配置，照着加删即可。
-  - config.py    : 负责把 config.yaml 读进来，加上一些行为常量（超时、重试、历史轮数等），
+分工（和 models.yaml 分开，方便阅读）：
+  - models.yaml  : 只管“有哪些模型、各连哪家、key 是什么”——傻瓜式配置，照着加删即可。
+  - config.py    : 负责把 models.yaml 读进来，加上一些行为常量（超时、重试、历史轮数等），
                    并提供方便的取用函数。
 
 设计要点：
-  - 选手数量 = config.yaml 里 model_list 的条数，配几个就是几个，不写死。
+  - 选手数量 = models.yaml 里 model_list 的条数，配几个就是几个，不写死。
   - 每个选手自带 api_base + api_key + model，不依赖任何“厂商名”或全局 key。
   - 这样几个模型都来自硅基流动也没关系，它们各记自己的连接信息即可。
 """
@@ -19,17 +19,17 @@ import yaml
 
 
 # ──────────────────────────────────────────────
-# 1. 加载 config.yaml
+# 1. 加载 models.yaml
 # ──────────────────────────────────────────────
 # yaml 文件就放在本文件同级目录。读一次，缓存起来用。
-_CONFIG_PATH = Path(__file__).parent / "config.yaml"
+_CONFIG_PATH = Path(__file__).parent / "models.yaml"
 
 
 def _load_yaml() -> dict:
-    """读取 config.yaml，返回原始字典。读不到就给个清晰报错。"""
+    """读取 models.yaml，返回原始字典。读不到就给个清晰报错。"""
     if not _CONFIG_PATH.exists():
         raise FileNotFoundError(
-            f"没找到配置文件 {_CONFIG_PATH}。请先创建 config.yaml（可参考 README）。"
+            f"没找到配置文件 {_CONFIG_PATH}。请先创建 models.yaml（可参考 README）。"
         )
     with open(_CONFIG_PATH, "r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
@@ -45,7 +45,7 @@ _RAW = _load_yaml()
 @dataclass
 class AgentConfig:
     """
-    一个参赛选手。字段全部直接来自 config.yaml 的一条 model_list 记录。
+    一个参赛选手。字段全部直接来自 models.yaml 的一条 model_list 记录。
 
     - name       ：UI 显示名 / 内部 id（取自 model_name）。
     - persona    ：中文人设，写进提示词，让不同模型有不同风格。
@@ -109,7 +109,7 @@ AGENTS: list[AgentConfig] = _build_agents(_RAW.get("model_list", []) or [])
 # ──────────────────────────────────────────────
 # 3. “主席”裁判模型（负责打分排序 + 合并最终答案）
 # ──────────────────────────────────────────────
-# 主席单独在 config.yaml 的 chair 节里配（结构和选手一样），用稳定低温调用。
+# 主席单独在 models.yaml 的 chair 节里配（结构和选手一样），用稳定低温调用。
 # 不配的话，默认复用第一个选手当主席，省得最小配置也能跑。
 
 @dataclass
@@ -128,7 +128,7 @@ def _build_chair() -> ChairConfig:
         a = AGENTS[0]
         return ChairConfig(name=a.name, model=a.model, api_base=a.api_base, api_key=a.api_key)
     else:
-        raise ValueError("config.yaml 既没有 model_list 也没有 chair，没法跑。")
+        raise ValueError("models.yaml 既没有 model_list 也没有 chair，没法跑。")
     return ChairConfig(
         name=str(chair_raw.get("model_name") or "主席"),
         model=_normalize_model(params.get("model", "")),

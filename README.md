@@ -44,15 +44,15 @@ pip install -r requirements.txt
 
 > 没有 conda 也能用 venv：`python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 
-### 2. 配置模型（创建你的 config.yaml）
+### 2. 配置模型（创建你的 models.yaml）
 
-仓库不会自带 `config.yaml`（因为它要放你的 API key，不提交）。改用模板生成：
+仓库不会自带 `models.yaml`（因为它要放你的 API key，不提交）。改用模板生成：
 
 ```bash
-cp config.example.yaml config.yaml
+cp models.example.yaml models.yaml
 ```
 
-然后打开 [config.yaml](config.yaml)，把每一条的 `api_key:` 占位符换成你的真实 key。模板里默认启用了 2 个选手（DeepSeek、GLM），还注释了通义千问 / Kimi / 豆包的写法，想用谁就取消注释、填上 key。
+然后打开 [models.yaml](models.yaml)，把每一条的 `api_key:` 占位符换成你的真实 key。模板里默认启用了 2 个选手（DeepSeek、GLM），还注释了通义千问 / Kimi / 豆包的写法，想用谁就取消注释、填上 key。
 
 每条选手需要填的东西：
 
@@ -68,7 +68,7 @@ model_list:
 ```
 
 > 加减选手 = 增删 `model_list` 条数，**选手数量 = 列表条数，随便几个都行**。
-> 写法完全对标 LiteLLM 官方的 config.yaml，将来也能直接喂给 litellm 本身。
+> 写法完全对标 LiteLLM 官方的 config.yaml 格式，将来也能直接喂给 litellm 本身。
 > 主席模型（打分+合并）可选，不配 `chair:` 节就默认复用第一个选手。
 > 几个模型都来自硅基流动也没关系——每个选手自带 api_base + api_key，按真实来源各填各的即可。
 
@@ -81,7 +81,7 @@ chainlit run app.py
 ```
 
 浏览器自动打开（默认 http://localhost:8000）。直接提问即可，每轮约 30~90 秒。
-**若 config.yaml 有没填的占位符，界面会明确提示缺哪个**，照提示补好重启即可。
+**若 models.yaml 有没填的占位符，界面会明确提示缺哪个**，照提示补好重启即可。
 
 ### 4. 命令行自测（不走 UI，看完整过程）
 
@@ -100,10 +100,10 @@ RoundTable/
 ├── CLAUDE.md              项目纲领（先读这个）
 ├── README.md              你正在读的
 ├── requirements.txt       依赖
-├── config.example.yaml    ★ 配置模板（脱敏示例，照着复制出 config.yaml）
-├── config.yaml            ★ 你的真实配置（含 key，不会进 git，需自行创建）
+├── models.example.yaml    ★ 配置模板（脱敏示例，照着复制出 models.yaml）
+├── models.yaml            ★ 你的真实配置（含 key，不会进 git，需自行创建）
 ├── run.sh                 一键启动脚本（source 即用）
-├── config.py              加载 config.yaml + 行为常量（超时/重试/历史轮数）+ 启动自检
+├── config.py              加载 models.yaml + 行为常量（超时/重试/历史轮数）+ 启动自检
 ├── llm.py                 LiteLLM 封装：统一的 call_llm()
 ├── prompts.py             4 阶段中文提示词模板
 ├── state.py               LangGraph 状态定义
@@ -123,10 +123,10 @@ RoundTable/
 
 | 想做的事 | 改哪里 |
 |---|---|
-| 加/减一个参赛选手 | `config.yaml` 的 `model_list`（复制一条 / 删一条） |
-| 改某个选手的模型/地址/key | `config.yaml` 对应那条的 `litellm_params` |
-| 改人设 / 温度 | `config.yaml` 对应那条的 `persona` / `temperature` |
-| 单独指定主席模型 | `config.yaml` 末尾加一个 `chair:` 节（结构同选手） |
+| 加/减一个参赛选手 | `models.yaml` 的 `model_list`（复制一条 / 删一条） |
+| 改某个选手的模型/地址/key | `models.yaml` 对应那条的 `litellm_params` |
+| 改人设 / 温度 | `models.yaml` 对应那条的 `persona` / `temperature` |
+| 单独指定主席模型 | `models.yaml` 末尾加一个 `chair:` 节（结构同选手） |
 | 改提示词文风 / 评判规则 | `prompts.py` |
 | 改界面展示 | `app.py` |
 | 改超时/重试/历史轮数 | `config.py` 的常量区 |
@@ -137,7 +137,7 @@ RoundTable/
 
 - **没填 key / 占位符还在**：界面会明确提示缺哪个选手的 key，补好重启即可。
 - **首轮较慢**：N 个选手约 N + N + 2 次模型调用（作答+参考修正+主席打分+合并），5 选手约 12 次，请耐心等。
-- **API key 安全**：key 写在 `config.yaml` 里方便是方便，但该文件已在 `.gitignore` 中、不会进 git。请不要把它提交到公开仓库，也不要把真实 key 截图分享。
+- **API key 安全**：key 写在 `models.yaml` 里方便是方便，但该文件已在 `.gitignore` 中、不会进 git。请不要把它提交到公开仓库，也不要把真实 key 截图分享。
 - **豆包模型名**：要用「推理接入点 endpoint id」(形如 ep-xxxx)，不是模型名，在火山方舟控制台创建后复制。
 - **推理模型温度**：若接的是 deepseek-r1 等推理模型，temperature 可能被拒；第一版默认配的是普通对话模型，不受影响。
 

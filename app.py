@@ -66,10 +66,10 @@ async def on_chat_start():
     # 检查配置是否就绪（选手是否够、key 是否填了）。
     missing = config.check_ready()
     if missing:
-        lines = ["⚠️ 圆桌配置未就绪，请打开 config.yaml 检查："]
+        lines = ["⚠️ 圆桌配置未就绪，请打开 models.yaml 检查："]
         for m in missing:
             lines.append(f"  - {m}")
-        lines.append("\n改好 config.yaml 后重启即可，无需其它配置。")
+        lines.append("\n改好 models.yaml 后重启即可，无需其它配置。")
         await cl.Message(content="\n".join(lines)).send()
         return
 
@@ -97,7 +97,7 @@ async def on_message(message: cl.Message):
     missing = config.check_ready()
     if missing:
         await cl.Message(
-            content="⚠️ 配置未就绪：" + "；".join(missing) + "\n请改好 config.yaml 后重启。"
+            content="⚠️ 配置未就绪：" + "；".join(missing) + "\n请改好 models.yaml 后重启。"
         ).send()
         return
 

@@ -1,12 +1,12 @@
 # 圆桌 RoundTable —— 模型配置文件（示例）
 #
 # 这是脱敏示例，不含任何真实 key。使用步骤：
-#   1. 复制本文件：cp config.example.yaml config.yaml
+#   1. 复制本文件：cp models.example.yaml models.yaml
 #   2. 把下面每一条的 api_key 占位符，换成你自己的真实 key
 #   3. （可选）按需增删 model_list 条目，改 persona / temperature
-#   真正生效的是 config.yaml，本文件仅作模板，不会被代码读取。
+#   真正生效的是 models.yaml，本文件仅作模板，不会被代码读取。
 #
-# 写法完全对标 LiteLLM 官方的 config.yaml：
+# 写法完全对标 LiteLLM 官方的 config.yaml 格式：
 #   model_list: 一个模型一条，每条有 model_name(别名) + persona + temperature + litellm_params(连接参数)。
 #
 # 傻瓜式用法（参考 Cherry Studio / Chatbox 添加模型的方式）：
@@ -40,23 +40,34 @@ model_list:
       api_base: https://api.deepseek.com
       api_key: 在此填写你的 API Key        # ← 换成你的真实 key
 
-  # —— 选手 2：GLM（智谱，经硅基流动 SiliconFlow 调用）——
+  # —— 选手 2：GLM（智谱开放平台，官方接口）——
+  #   这里走智谱官方接口（非硅基流动）。注意：官方接口只认智谱自己的模型名，
+  #   不认「zai-org/GLM-5.2」这种带厂商前缀的写法（那是硅基流动上的命名）。
+  #   所以下面 model 里默认填的是个直观占位名，真要走官方请改成官网当前可用的
+  #   官方模型名（如 glm-4.6 等，确切名以 https://open.bigmodel.cn 官网为准），
+  #   key 也要用智谱平台申请的 key。若更想用一个 key 调多家厂商，也可把 api_base
+  #   改回 https://api.siliconflow.cn、model 名保持不变、用硅基流动的 key。
   - model_name: GLM
     persona: ""
     temperature: 1.0
     litellm_params:
-      model: zai-org/GLM-5.2
-      api_base: https://api.siliconflow.cn
-      api_key: 在此填写你的 API Key        # ← 换成你的硅基流动 key
+      model: zai-org/GLM-5.2          # ← 走智谱官方接口须改成官方模型名（见上方说明）
+      api_base: https://open.bigmodel.cn/api/paas/v4
+      api_key: 在此填写你的 API Key        # ← 智谱开放平台的 API Key
 
-  # —— 选手 3：Kimi（Moonshot，经硅基流动调用）——
+  # —— 选手 3：Kimi（Moonshot，官方接口）——
+  #   这里走 Moonshot 官方接口（非硅基流动）。注意：官方接口只认 Moonshot 自己的
+  #   模型名，不认「moonshotai/Kimi-K2.7-Code」这种带厂商前缀的写法（那是硅基流动上的
+  #   命名）。真要走官方请把下面 model 改成官网当前可用的官方模型名
+  #   （如 moonshot-v1-8k 等，确切名以 https://platform.moonshot.cn 官网为准），
+  #   key 用 Moonshot 平台申请的 key。若更想一个 key 调多家，也可改回硅基流动。
   # - model_name: Kimi
   #   persona: ""
   #   temperature: 1.0
   #   litellm_params:
-  #     model: moonshotai/Kimi-K2.7-Code
-  #     api_base: https://api.siliconflow.cn
-  #     api_key: 在此填写你的 API Key
+  #     model: moonshotai/Kimi-K2.7-Code   # ← 走 Moonshot 官方接口须改成官方模型名（见上方说明）
+  #     api_base: https://api.moonshot.cn/v1
+  #     api_key: 在此填写你的 API Key       # ← Moonshot 平台的 API Key
 
   # —— 选手 4：通义千问（阿里云百炼）——
   # - model_name: Qwen

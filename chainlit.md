@@ -15,9 +15,9 @@
 
 1. **配置模型**:首次使用先复制模板并填好你的 API key:
    ```bash
-   cp config.example.yaml config.yaml
+   cp models.example.yaml models.yaml
    ```
-   然后编辑 `config.yaml`,把每条 `api_key:` 占位符换成真实 key。加减选手 = 增删 `model_list` 条目。
+   然后编辑 `models.yaml`,把每条 `api_key:` 占位符换成真实 key。加减选手 = 增删 `model_list` 条目。
 2. **启动**:`conda activate roundtable && chainlit run app.py`(或 `source run.sh`)。
 3. **提问**:在下方输入框直接问即可,每轮约 30~90 秒。
 

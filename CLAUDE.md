@@ -26,8 +26,8 @@
 - ✅ 纯文本,不接 MCP 工具
 - ✅ 修正形式:每个 agent 看**除自己外其他人(匿名)的初始回答**,参考后直接修正自己(不再做两两互评;原方案互评耗 N×(N-1) 次调用且只能看二手评价,现为 N 次调用、看第一手回答)
 - ✅ 打分排序 + 合并最终答案:**单独一个"主席"模型**当裁判(可选;不配则默认复用第一个选手)
-- ✅ **已支持多厂商混搭**:DeepSeek / 通义千问 / GLM / Kimi / 豆包 等,在 `config.yaml` 里各填各的连接信息即可。多样性既可靠"多厂商",也可靠"同一模型 + 不同角色人设/温度"
-- ✅ API key 直接写在 `config.yaml` 的每条 `litellm_params` 里,不需要环境变量、不需要 `.env`
+- ✅ **已支持多厂商混搭**:DeepSeek / 通义千问 / GLM / Kimi / 豆包 等,在 `models.yaml` 里各填各的连接信息即可。多样性既可靠"多厂商",也可靠"同一模型 + 不同角色人设/温度"
+- ✅ API key 直接写在 `models.yaml` 的每条 `litellm_params` 里,不需要环境变量、不需要 `.env`
 
 ❌ 第一版不做:知识库 RAG、多轮辩论循环、MCP 工具、UI 可调节点数/温度的控件。
 
@@ -56,14 +56,14 @@
 - 初始回答、修正等**中间过程不进**会话上下文,只在 Chainlit 界面的进度面板里给人看。
 - 这样既能"博采众方",又不会把上下文撑爆。
 
-## 配置怎么管:config.yaml + config.py
+## 配置怎么管:models.yaml + config.py
 
 项目配置分两个文件,各司其职:
 
-- **`config.yaml`**:只管"有哪些模型、各连哪家、key 是什么"——傻瓜式配置,照着加删即可。这是**唯一需要你动手填的文件**,而且因为含 key,**不进 git**(已在 `.gitignore`)。
-- **`config.py`**:负责把 `config.yaml` 读进来,加上行为常量(超时 `MODEL_TIMEOUT`、重试 `MAX_RETRIES`、历史轮数 `MAX_HISTORY_TURNS`),并提供 `check_ready()` 启动自检。代码里 `import config` 时就会加载 yaml,找不到文件会直接报错。
+- **`models.yaml`**:只管"有哪些模型、各连哪家、key 是什么"——傻瓜式配置,照着加删即可。这是**唯一需要你动手填的文件**,而且因为含 key,**不进 git**(已在 `.gitignore`)。
+- **`config.py`**:负责把 `models.yaml` 读进来,加上行为常量(超时 `MODEL_TIMEOUT`、重试 `MAX_RETRIES`、历史轮数 `MAX_HISTORY_TURNS`),并提供 `check_ready()` 启动自检。代码里 `import config` 时就会加载 yaml,找不到文件会直接报错。
 
-`config.yaml` 的结构完全对标 LiteLLM 官方写法:
+`models.yaml` 的结构完全对标 LiteLLM 官方写法:
 
 ```yaml
 model_list:                 # 参赛选手,条数 = 选手数
@@ -83,10 +83,10 @@ chair:                       # 可选:主席模型。不配则默认用第一个
     api_key: sk-xxxx
 ```
 
-仓库不自带 `config.yaml`,而是给了脱敏模板 **`config.example.yaml`**。新用户第一步:
+仓库不自带 `models.yaml`,而是给了脱敏模板 **`models.example.yaml`**。新用户第一步:
 
 ```bash
-cp config.example.yaml config.yaml   # 然后编辑 config.yaml 填 key
+cp models.example.yaml models.yaml   # 然后编辑 models.yaml 填 key
 ```
 
 > **模型名 `model` 字段的规范**(`config.py` 的 `_normalize_model` 统一处理):
@@ -103,11 +103,11 @@ RoundTable/
 ├── CLAUDE.md              ← 你正在读的这篇,项目纲领
 ├── README.md              ← 怎么装、怎么跑(面向使用者)
 ├── requirements.txt       ← 依赖与版本
-├── config.example.yaml    ← 配置模板(脱敏示例,复制成 config.yaml 用)
-├── config.yaml            ← 真实配置(含 key,不进 git,需自行创建)
+├── models.example.yaml    ← 配置模板(脱敏示例,复制成 models.yaml 用)
+├── models.yaml            ← 真实配置(含 key,不进 git,需自行创建)
 ├── run.sh                 ← 一键启动脚本(source 即用)
 ├── chainlit.md            ← Chainlit 首屏欢迎页内容
-├── config.py              ← 配置:加载 config.yaml + 行为常量 + 启动自检(改常量动这里)
+├── config.py              ← 配置:加载 models.yaml + 行为常量 + 启动自检(改常量动这里)
 ├── llm.py                 ← LiteLLM 封装:统一的 call_llm()
 ├── prompts.py             ← 4 阶段的中文提示词模板
 ├── state.py               ← LangGraph 的状态定义(TypedDict)
@@ -126,8 +126,8 @@ RoundTable/
 
 ```bash
 conda activate roundtable          # 用已建好的 conda 环境
-cp config.example.yaml config.yaml # 从模板创建配置(首次)
-# 编辑 config.yaml,把每条 api_key 占位符换成真实 key
+cp models.example.yaml models.yaml # 从模板创建配置(首次)
+# 编辑 models.yaml,把每条 api_key 占位符换成真实 key
 chainlit run app.py                # 启动,浏览器自动打开
 # 或:source run.sh                 # 在已 activate 的终端里一键启动
 ```
@@ -142,7 +142,7 @@ python graph.py                    # 跑完整 4 阶段,终端打印全过程
 - **中文注释**为主,写给"不懂这三个库"的人看,关键处解释"为什么这么写"。
 - **模块化、多文件**,每个文件职责单一、可单独读懂。
 - **简约不简单**:核心功能做扎实,次要的先不写;不追求完美,迭代式前进。
-- 加减选手 / 换模型 / 改人设 / 改温度 / 指定主席 —— **只动 `config.yaml`**,不动其它文件。
+- 加减选手 / 换模型 / 改人设 / 改温度 / 指定主席 —— **只动 `models.yaml`**,不动其它文件。
 - 改超时/重试/历史轮数等行为常量 —— 动 `config.py` 的常量区。
 - 改提示词文风、评判规则 —— 动 `prompts.py` / `chair.py`。
 
@@ -163,4 +163,4 @@ python graph.py                    # 跑完整 4 阶段,终端打印全过程
 - [ ] 知识库 RAG 检索
 - [ ] 评分策略细化、多轮辩论循环、UI 上可调节点数/温度的控件
 
-> 注:**多厂商混搭已在第一版落地**(改 `config.yaml` 即可,图不动),所以不再列入未来计划。
+> 注:**多厂商混搭已在第一版落地**(改 `models.yaml` 即可,图不动),所以不再列入未来计划。
